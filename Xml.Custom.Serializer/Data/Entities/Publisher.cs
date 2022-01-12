@@ -1,4 +1,6 @@
-﻿using Data.Entities.Contracts;
+﻿using System;
+using System.Collections.Generic;
+using Data.Entities.Contracts;
 using Xml.Custom.Serializer.Attributes;
 
 namespace Data.Entities

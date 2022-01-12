@@ -1,4 +1,5 @@
-﻿using Data.Entities.Contracts;
+﻿using System;
+using Data.Entities.Contracts;
 
 namespace Data.Entities
 {

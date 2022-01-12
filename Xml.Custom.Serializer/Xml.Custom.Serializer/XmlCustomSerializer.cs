@@ -34,7 +34,8 @@ namespace Xml.Custom.Serializer
                 if (property != null)
                 {
                     var propertyType = property.PropertyType;
-                    if (obj.GetType().CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray))) {
+                    if (obj.GetType().CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray)))
+                    {
                         var collection = (IList)property.GetValue(obj);
                         if (collection == null)
                             collection = new List<object>();
@@ -42,7 +43,7 @@ namespace Xml.Custom.Serializer
                         property.SetValue(obj, collection);
                     }
                     else
-                    {                       
+                    {
                         property.SetValue(obj, Convert.ChangeType(attribute.Value, propertyType));
                     }
                 }
@@ -64,7 +65,7 @@ namespace Xml.Custom.Serializer
                     if (innerObjType.CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray)))
                     {
                         var collection = (IList)innerProperty.GetValue(obj);
-                        if(collection == null) 
+                        if (collection == null)
                             collection = new List<object>();
                         collection.Add(obj);
                         innerProperty.SetValue(obj, collection);
@@ -77,6 +78,22 @@ namespace Xml.Custom.Serializer
             }
 
             return obj;
+        }
+
+        public string Deserialize<T>(T obj)
+        {
+            var objProps = obj.GetType().GetProperties();
+
+            XmlDocument root = new XmlDocument();
+            foreach (var p in objProps)
+            {
+                XmlAttribute atribute = root.CreateAttribute(p.Name);
+                atribute.Value = p.GetValue(obj).ToString();
+
+                root.Attributes.Append(atribute);
+            }
+
+            return root.ToString();
         }
     }
 }
