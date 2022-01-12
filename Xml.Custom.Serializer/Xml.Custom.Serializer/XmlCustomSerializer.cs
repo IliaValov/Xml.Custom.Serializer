@@ -1,26 +1,29 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Xml.Custom.Serializer.Attributes;
 
 namespace Xml.Custom.Serializer
 {
     public class XmlCustomSerializer
     {
+
         public T Serialize<T>(string xml)
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
 
-            XmlElement firstElement = doc.DocumentElement;
+            XmlElement rootElement = doc.DocumentElement;
 
-            var obj = this.SerializeObject(firstElement, typeof(T));
+            var obj = this.SerializeObject(rootElement, typeof(T));
 
             return (T)obj;
         }
 
         public object SerializeObject(XmlNode currentElement, Type type)
         {
-
             var obj = Activator.CreateInstance(type);
             var objProperties = obj.GetType().GetProperties();
 
@@ -31,8 +34,17 @@ namespace Xml.Custom.Serializer
                 if (property != null)
                 {
                     var propertyType = property.PropertyType;
-
-                    property.SetValue(obj, Convert.ChangeType(attribute.Value, propertyType));
+                    if (obj.GetType().CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray))) {
+                        var collection = (IList)property.GetValue(obj);
+                        if (collection == null)
+                            collection = new List<object>();
+                        collection.Add(Convert.ChangeType(attribute.Value, propertyType));
+                        property.SetValue(obj, collection);
+                    }
+                    else
+                    {                       
+                        property.SetValue(obj, Convert.ChangeType(attribute.Value, propertyType));
+                    }
                 }
             }
 
@@ -48,7 +60,19 @@ namespace Xml.Custom.Serializer
                     var innerObj = Activator.CreateInstance(innerObjType);
 
                     var result = SerializeObject(element, innerObjType);
-                    innerProperty.SetValue(obj, result);
+
+                    if (innerObjType.CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray)))
+                    {
+                        var collection = (IList)innerProperty.GetValue(obj);
+                        if(collection == null) 
+                            collection = new List<object>();
+                        collection.Add(obj);
+                        innerProperty.SetValue(obj, collection);
+                    }
+                    else
+                    {
+                        innerProperty.SetValue(obj, result);
+                    }
                 }
             }
 
