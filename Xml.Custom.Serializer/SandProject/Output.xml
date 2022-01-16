@@ -1,0 +1,13 @@
+﻿<?xml version="1.0"?>
+<!DOCTYPE Root [
+  <!ELEMENT Root (Vendor+)>
+  <!ELEMENT Vendor (Products)>
+  <!ATTLIST Vendor Name CDATA "">
+  <!ATTLIST Vendor Id CDATA "">
+  <!ELEMENT Products (Product+)>
+  <!ELEMENT Product (#PCDATA)>
+  <!ATTLIST Product Id CDATA "">
+  <!ATTLIST Product Name CDATA "">
+  <!ATTLIST Product Price CDATA "">
+  <!ATTLIST Product VendorId CDATA "">
+]>

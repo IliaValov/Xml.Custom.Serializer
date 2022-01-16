@@ -1,10 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using SandProject;
-using Xml.Custom.Serializer;
+using Data;
+using Services;
+using Services.Contracts;
 
-const string xml = @"<book name='Jivota mi' something='1'><author name='Gayorgy'><book name='Jivota mi2' something='1'></book><book name='Jivota mi 3' something='1'></book></author></book>";
+string xml = File.ReadAllText(@"D:\Programs\Xml.Custom.Serializer\Xml.Custom.Serializer\SandProject\Input.xml");
 
+using (var dbContext = new StoreDbContext())
+{
+    IDataService dataService = new DataService(dbContext);
+    dataService.SerializeXmlToDbEntities(xml).GetAwaiter().GetResult();
+    Console.WriteLine(dataService.DeserializeAllDbEntitiesToXml().GetAwaiter().GetResult());
+}
 
-var serializer = new XmlCustomSerializer();
-var book = serializer.Serialize<Book>(xml);
-Console.WriteLine(book.ToString());

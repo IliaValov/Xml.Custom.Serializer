@@ -1,8 +1,8 @@
 ﻿namespace Xml.Custom.Serializer.Attributes
 {
-    public class XmlArray : System.Attribute
+    public class XmlAttribute : System.Attribute
     {
-        public XmlArray(string name)
+        public XmlAttribute(string name)
         {
             this.Name = name;
         }

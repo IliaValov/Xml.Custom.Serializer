@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<!DOCTYPE Vendor [
+  <!ELEMENT Vendor (Products)>
+  <!ATTLIST Vendor Name CDATA "">
+  <!ELEMENT Products (Product+)>
+  <!ELEMENT Product (#PCDATA)>
+  <!ATTLIST Product Name CDATA "">
+  <!ATTLIST Product Price CDATA "">
+]>
+<Vendor Name='VendorTest1'>
+  <Products>
+    <Product Nam='TestProduct1' Price='12.5'></Product>
+    <Product Name='TestProduct2' Price='24.12'></Product>
+  </Products>
+</Vendor>
