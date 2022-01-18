@@ -12,8 +12,6 @@ namespace Xml.Custom.Serializer
 {
     public class XmlCustomSerializer
     {
-
-        private bool isXmlValid = false;
         private HashSet<object> pastObject = new HashSet<object>();
 
         public T Serialize<T>(string xml, bool dtdValidation = false)
@@ -45,16 +43,22 @@ namespace Xml.Custom.Serializer
 
         public object SerializeObject(XmlNode currentElement, Type type)
         {
+            // Creating current element object
             var obj = Activator.CreateInstance(type);
+            // Getting the properties for the object
             var objProperties = obj.GetType().GetProperties();
 
             foreach (System.Xml.XmlAttribute attribute in currentElement.Attributes)
             {
+                // Getting the property for the current attribute
                 var attributPproperty = objProperties.FirstOrDefault(x => x.Name.ToLower() == attribute.Name.ToLower());
 
+                // Cheching if the attribute property exists
                 if (attributPproperty != null)
                 {
+                    // Getting the property type
                     var propertyType = attributPproperty.PropertyType;
+                    // Checking if the property has attribute XmlArray that indicates if the 
                     if (obj.GetType().CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray)))
                     {
                         attributPproperty.SetValue(obj, Convert.ChangeType(this.SerializeCollection(attribute, attributPproperty), propertyType));
@@ -65,7 +69,6 @@ namespace Xml.Custom.Serializer
                     }
                 }
             }
-
 
             foreach (XmlNode element in currentElement.ChildNodes)
             {
@@ -154,7 +157,6 @@ namespace Xml.Custom.Serializer
         private void AppendItems(XmlNode xmlNode, XmlDocument root, IList collection, PropertyInfo property = null)
         {
             var collectionName = property != null ? ((XmlArray)property.GetCustomAttributes().FirstOrDefault(x => x.GetType() == typeof(XmlArray))).Name : "Root";
-            var itemName = property != null ? ((XmlArrayItem)property.GetCustomAttributes().FirstOrDefault(x => x.GetType() == typeof(XmlArrayItem))).Name : "RootItem";
 
             if (collection != null && collection.Count > 0)
             {
