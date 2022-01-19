@@ -19,20 +19,20 @@ namespace Services
         {
             var serializer = new XmlCustomSerializer();
             var vendors = await this.dbContext.Vendors.Include(x => x.Products).ToListAsync();
-            return serializer.Deserialize<List<Vendor>>(vendors);
+            return serializer.Serialize<List<Vendor>>(vendors);
         }
 
         public async Task<string> DeserializeDbEntitesToXml()
         {
             var serializer = new XmlCustomSerializer();
             var vendor = this.dbContext.Vendors.Include(x => x.Products).FirstOrDefault(x => x.Id == new Guid("f3e2062d-9466-4164-b6ca-19b4d0045526"));
-            return serializer.Deserialize<Vendor>(vendor);
+            return serializer.Serialize<Vendor>(vendor);
         }
 
         public async Task SerializeXmlToDbEntities(string xml)
         {
             var serializer = new XmlCustomSerializer();
-            var result = serializer.Serialize<Vendor>(xml, true);
+            var result = serializer.Deserialize<Vendor>(xml, true);
             await this.dbContext.Vendors.AddAsync(result);
             await this.dbContext.SaveChangesAsync();
         }

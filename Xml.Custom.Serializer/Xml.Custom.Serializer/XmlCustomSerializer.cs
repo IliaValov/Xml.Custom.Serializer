@@ -14,7 +14,7 @@ namespace Xml.Custom.Serializer
     {
         private HashSet<object> pastObject = new HashSet<object>();
 
-        public T Serialize<T>(string xml, bool dtdValidation = false)
+        public T Deserialize<T>(string xml, bool dtdValidation = false)
         {
             const string filePath = "file.xml";
             XmlDocument doc = new XmlDocument();
@@ -36,12 +36,12 @@ namespace Xml.Custom.Serializer
 
             XmlElement rootElement = doc.DocumentElement;
 
-            var obj = this.SerializeObject(rootElement, typeof(T));
+            var obj = this.DeserializeObject(rootElement, typeof(T));
 
             return (T)obj;
         }
 
-        public object SerializeObject(XmlNode currentElement, Type type)
+        public object DeserializeObject(XmlNode currentElement, Type type)
         {
             // Creating current element object
             var obj = Activator.CreateInstance(type);
@@ -61,7 +61,7 @@ namespace Xml.Custom.Serializer
                     // Checking if the property has attribute XmlArray that indicates if the 
                     if (obj.GetType().CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray)))
                     {
-                        attributPproperty.SetValue(obj, Convert.ChangeType(this.SerializeCollection(attribute, attributPproperty), propertyType));
+                        attributPproperty.SetValue(obj, Convert.ChangeType(this.DeserializeCollection(attribute, attributPproperty), propertyType));
                     }
                     else
                     {
@@ -81,11 +81,11 @@ namespace Xml.Custom.Serializer
 
                     if (elementProperty.CustomAttributes.Any(x => x.AttributeType == typeof(XmlArray)))
                     {
-                        elementProperty.SetValue(obj, this.SerializeCollection(element, elementProperty));
+                        elementProperty.SetValue(obj, this.DeserializeCollection(element, elementProperty));
                     }
                     else
                     {
-                        var result = SerializeObject(element, elementObjType);
+                        var result = DeserializeObject(element, elementObjType);
                         elementProperty.SetValue(obj, result);
                     }
                 }
@@ -94,12 +94,12 @@ namespace Xml.Custom.Serializer
             return obj;
         }
 
-        public string Deserialize<T>(T obj)
+        public string Serialize<T>(T obj)
         {
             XmlDocument root = new XmlDocument();
             this.pastObject.Clear();
 
-            var xmlNode = this.DeserializeObject(obj, root);
+            var xmlNode = this.SerializeObject(obj, root);
 
             if (xmlNode != null)
                 root.AppendChild(xmlNode);
@@ -107,7 +107,7 @@ namespace Xml.Custom.Serializer
             return root.OuterXml;
         }
 
-        private XmlNode DeserializeObject(object obj, XmlDocument root)
+        private XmlNode SerializeObject(object obj, XmlDocument root)
         {
             System.Xml.XmlElement xmlElement = null;
             if (typeof(IEnumerable).IsAssignableFrom(obj.GetType()))
@@ -137,7 +137,7 @@ namespace Xml.Custom.Serializer
                     if (!this.pastObject.Contains(obj))
                     {
                         this.pastObject.Add(obj);
-                        xmlElement.AppendChild(this.DeserializeObject(p.GetValue(obj), root));
+                        xmlElement.AppendChild(this.SerializeObject(p.GetValue(obj), root));
                     }
                 }
             }
@@ -166,13 +166,13 @@ namespace Xml.Custom.Serializer
                     if (!this.pastObject.Contains(item))
                     {
                         this.pastObject.Add(item);
-                        node.AppendChild(this.DeserializeObject(item, root));
+                        node.AppendChild(this.SerializeObject(item, root));
                     }
                 }
             }
         }
 
-        private object SerializeCollection(XmlNode xmlNode, PropertyInfo property)
+        private object DeserializeCollection(XmlNode xmlNode, PropertyInfo property)
         {
 
             var itemName = ((XmlArrayItem)property.GetCustomAttributes().FirstOrDefault(x => x.GetType() == typeof(XmlArrayItem))).Name;
@@ -181,7 +181,7 @@ namespace Xml.Custom.Serializer
 
             foreach (XmlNode item in xmlNode.ChildNodes)
             {
-                result.Add(this.SerializeObject(item, itemType));
+                result.Add(this.DeserializeObject(item, itemType));
             }
 
             return result;
